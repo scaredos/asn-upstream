@@ -1,5 +1,5 @@
 # asn-upstream
-Simple tool to find the upstream for a specific ASN
+Simple tool to find the upstream for a specific IP
 
 Usage:
 ```
