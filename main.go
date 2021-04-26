@@ -65,7 +65,18 @@ func main() {
 			body = string(bodyBytes)
 			body = strings.Split(body, `<h6 class="font-weight-normal opacity-50">`)[1]
 			body = strings.Split(body, "</h6>")[0]
-			fmt.Println("    " + body)
+			fmt.Println("    " + body + " (upstream)")
+		} else if neighbors[i].Type == "right" {
+			neighborAsn := "AS" + strconv.Itoa(neighbors[i].Asn)
+			req, _ = http.NewRequest("GET", "https://ipinfo.io/"+neighborAsn, nil)
+			req.Header.Set("User-Agent", "Mozilla/5.0")
+			resp, _ = client.Do(req)
+			defer resp.Body.Close()
+			bodyBytes, _ = ioutil.ReadAll(resp.Body)
+			body = string(bodyBytes)
+			body = strings.Split(body, `<h6 class="font-weight-normal opacity-50">`)[1]
+			body = strings.Split(body, "</h6>")[0]
+			fmt.Println("    " + body + " (downstream)")
 		}
 	}
 }
