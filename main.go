@@ -42,7 +42,7 @@ type asData struct {
 
 // Function to return an IPv4 address from a string
 func ipFind(ip string) string {
-	r, _ := regexp.Compile(`\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b`)
+	r, _ := regexp.MustCompile(`\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b`)
 	return r.FindString(ip)
 }
 
@@ -75,24 +75,17 @@ func main() {
 	neighbors := asNeighbor.Data.Neighbours
 	fmt.Println("Neighbors:")
 	for i := 0; i < len(neighbors); i++ {
+		neighborAsn := "AS" + strconv.Itoa(neighbors[i].Asn)
+		req, _ = http.NewRequest("GET", "https://stat.ripe.net/data/as-overview/data.json?resource="+neighborAsn, nil)
+		resp, _ = client.Do(req)
+		defer resp.Body.Close()
+		bodyBytes, _ = ioutil.ReadAll(resp.Body)
+		var neighbor asData
+		json.Unmarshal(bodyBytes, &neighbor)
 		switch neighbors[i].Type {
 		case "left":
-			neighborAsn := "AS" + strconv.Itoa(neighbors[i].Asn)
-			req, _ = http.NewRequest("GET", "https://stat.ripe.net/data/as-overview/data.json?resource="+neighborAsn, nil)
-			resp, _ = client.Do(req)
-			defer resp.Body.Close()
-			bodyBytes, _ = ioutil.ReadAll(resp.Body)
-			var neighbor asData
-			json.Unmarshal(bodyBytes, &neighbor)
 			fmt.Printf("\t%s - %s (upstream)\n", neighborAsn, neighbor.Data.Holder)
 		case "right":
-			neighborAsn := "AS" + strconv.Itoa(neighbors[i].Asn)
-			req, _ = http.NewRequest("GET", "https://stat.ripe.net/data/as-overview/data.json?resource="+neighborAsn, nil)
-			resp, _ = client.Do(req)
-			defer resp.Body.Close()
-			bodyBytes, _ = ioutil.ReadAll(resp.Body)
-			var neighbor asData
-			json.Unmarshal(bodyBytes, &neighbor)
 			fmt.Printf("\t%s - %s (downstream)\n", neighborAsn, neighbor.Data.Holder)
 		}
 	}
