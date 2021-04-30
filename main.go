@@ -42,7 +42,7 @@ type asData struct {
 
 // Function to return an IPv4 address from a string
 func ipFind(ip string) string {
-	r, _ := regexp.MustCompile(`\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b`)
+	r := regexp.MustCompile(`\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b`)
 	return r.FindString(ip)
 }
 
@@ -75,6 +75,10 @@ func main() {
 	neighbors := asNeighbor.Data.Neighbours
 	fmt.Println("Neighbors:")
 	for i := 0; i < len(neighbors); i++ {
+		// if the ASN type is uncertain, skip
+		if neighbors[i].Type == "uncertain" {
+			break
+		}
 		neighborAsn := "AS" + strconv.Itoa(neighbors[i].Asn)
 		req, _ = http.NewRequest("GET", "https://stat.ripe.net/data/as-overview/data.json?resource="+neighborAsn, nil)
 		resp, _ = client.Do(req)
